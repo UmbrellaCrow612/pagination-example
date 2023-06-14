@@ -7,8 +7,6 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <SWRConfig
         value={{
-          fetcher: (resource, init) =>
-            fetch(resource, init).then((res) => res.json()),
           errorRetryCount: 3,
           errorRetryInterval: 1500,
           shouldRetryOnError: true,

@@ -1,23 +1,52 @@
-import usePokemon from "@/hooks/usePokemon";
-import { useSearchParams } from "next/navigation";
+import React, { useState, useEffect } from "react";
 
-export default function Home() {
-  const searchParams = useSearchParams();
-  const offset = searchParams.get("offset");
-  const limit = searchParams.get("limit");
-  const { data, error, isLoading, isValidating, mutate } = usePokemon({
-    offset: offset,
-    limit: limit,
-  });
+const PokemonList = () => {
+  const [pokemons, setPokemons] = useState([]);
+  const [next, setNext] = useState(null);
+  const [previous, setPrevious] = useState(null);
 
-  // On render of page and or when there is not / has been alerted url to set offset and limit to base 20 always = middleware
+  const fetchPokemons = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setPokemons(data.results);
+      setNext(data.next);
+      setPrevious(data.previous);
+    } catch (error) {
+      console.error("Error fetching pokemons:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPokemons("https://pokeapi.co/api/v2/pokemon");
+  }, []);
+
+  const handleNext = () => {
+    if (next) {
+      fetchPokemons(next);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (previous) {
+      fetchPokemons(previous);
+    }
+  };
+
   return (
-    <>
-      {JSON.stringify(data)}
-      <div className="flex items-center gap-4">
-        <button>Next</button>
-        <button>Previous</button>
-      </div>
-    </>
+    <div>
+      <h1>Pokémon List</h1>
+      {pokemons.map((pokemon:any) => (
+        <div key={pokemon.name}>{pokemon.name}</div>
+      ))}
+      <button onClick={handlePrevious} disabled={!previous}>
+        Previous
+      </button>
+      <button onClick={handleNext} disabled={!next}>
+        Next
+      </button>
+    </div>
   );
-}
+};
+
+export default PokemonList;
